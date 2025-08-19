@@ -91,11 +91,11 @@ MATCH (p:Phone)
 WHERE p.articulationPoint = 1
 WITH p, COUNT { (p)<-[:HAS_PHONE]-() } AS connections
 RETURN 
-    p.number AS PhoneNumber,
+    p.phoneNumber AS PhoneNumber,
     connections AS ConnectedCustomers,
     CASE 
-        WHEN p.number CONTAINS '000' THEN '🗑️ Default'
-        WHEN p.number CONTAINS '999' THEN '🗑️ Test'
+        WHEN p.phoneNumber CONTAINS '000' THEN '🗑️ Default'
+        WHEN p.phoneNumber CONTAINS '999' THEN '🗑️ Test'
         WHEN connections > 3 THEN '⚠️ Investigate'
         ELSE '✅ Legitimate'
     END AS Classification
@@ -199,8 +199,8 @@ RETURN nodeType,
        [ex IN examples | 
            CASE labels(ex)[0]
                WHEN 'Email' THEN ex.address
-               WHEN 'Phone' THEN ex.number
-               WHEN 'SSN' THEN substring(ex.value, 0, 3) + '-XX-XXXX'
+               WHEN 'Phone' THEN ex.phoneNumber
+               WHEN 'SSN' THEN substring(ex.ssnNumber, 0, 3) + '-XX-XXXX'
                ELSE ex.id
            END + ' (' + SIZE([(ex)-[]-() | 1]) + ' connections)'
        ] AS topExamples

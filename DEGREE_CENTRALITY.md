@@ -74,8 +74,8 @@ RETURN
     labels(node)[0] AS nodeType,
     CASE labels(node)[0]
         WHEN 'Email' THEN node.address
-        WHEN 'Phone' THEN node.number
-        WHEN 'SSN' THEN node.value
+        WHEN 'Phone' THEN node.phoneNumber
+        WHEN 'SSN' THEN node.ssnNumber
         ELSE node.id
     END AS identifier,
     score AS connections
@@ -134,13 +134,13 @@ LIMIT 25;
 MATCH (p:Phone)
 WHERE p.degreeScore > 10
 RETURN
-    p.number AS PhoneNumber,
+    p.phoneNumber AS PhoneNumber,
     p.degreeScore AS Connections,
     CASE
         WHEN p.degreeScore > 100 THEN '🔴 Super Node - Exclude'
-        WHEN p.number CONTAINS '000000' THEN '🟠 Default - Exclude'
-        WHEN p.number CONTAINS '999999' THEN '🟠 Test - Exclude'
-        WHEN p.number CONTAINS '555' THEN '🟠 Fictional - Exclude'
+        WHEN p.phoneNumber CONTAINS '000000' THEN '🟠 Default - Exclude'
+        WHEN p.phoneNumber CONTAINS '999999' THEN '🟠 Test - Exclude'
+        WHEN p.phoneNumber CONTAINS '555' THEN '🟠 Fictional - Exclude'
         WHEN p.degreeScore >= 10 AND p.degreeScore <= 50 THEN '🟡 High Share - Review'
         ELSE '⚠️ Investigate'
     END AS Classification
@@ -154,11 +154,11 @@ MATCH (s:SSN)
 WHERE s.degreeScore > 5
 RETURN
     // Mask SSN for security
-    substring(s.snnNumber, 0, 3) + '-XX-XXXX' AS MaskedSSN,
+    substring(s.ssnNumber, 0, 3) + '-XX-XXXX' AS MaskedSSN,
     s.degreeScore AS Connections,
     CASE
         WHEN s.degreeScore > 50 THEN '🔴 Critical - Synthetic Identity'
-        WHEN s.snnNumber STARTS WITH '000' THEN '🟠 Invalid SSN'
+        WHEN s.ssnNumber STARTS WITH '000' THEN '🟠 Invalid SSN'
         WHEN s.degreeScore >= 10 THEN '⚠️ High Risk - Investigate'
         ELSE '✅ Normal'
     END AS Classification
@@ -295,8 +295,8 @@ RETURN nodeType, degreeCategory, nodeCount,
        [ex IN examples | 
            CASE labels(ex)[0]
                WHEN 'Email' THEN ex.address
-               WHEN 'Phone' THEN ex.number
-               WHEN 'SSN' THEN substring(ex.snnNumber, 0, 3) + '-XX-XXXX'
+               WHEN 'Phone' THEN ex.phoneNumber
+               WHEN 'SSN' THEN substring(ex.ssnNumber, 0, 3) + '-XX-XXXX'
                ELSE ex.id
            END
        ] AS exampleIdentifiers

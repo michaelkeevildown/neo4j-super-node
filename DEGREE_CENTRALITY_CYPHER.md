@@ -80,7 +80,7 @@ CALL () {
   RETURN 
     n,
     'SSN' as nodeType,
-    n.snnNumber as identifier,
+    n.ssnNumber as identifier,
     degree
 }
 
@@ -174,7 +174,7 @@ CALL () {
   RETURN 
     n,
     'SSN' as nodeType,
-    n.snnNumber as identifier,
+    n.ssnNumber as identifier,
     degree
 }
 
@@ -233,7 +233,7 @@ RETURN
     CASE labels(n)[0]
         WHEN 'Email' THEN n.address
         WHEN 'Phone' THEN n.phoneNumber
-        WHEN 'SSN' THEN n.snnNumber
+        WHEN 'SSN' THEN n.ssnNumber
     END as identifier
 ORDER BY n.degreeScore DESC
 LIMIT 30;
