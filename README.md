@@ -23,7 +23,7 @@ These placeholder values become **super nodes** - creating thousands of false co
 
 ## 🗂️ Graph Data Model
 
-![Graph Schema](schema.png)
+![Graph Schema](diagrams/schema.png)
 
 ### Node Types
 
