@@ -137,27 +137,92 @@ RETURN p;
 ### Weekly Maintenance Tasks
 
 ```cypher
--- 1. Re-run detection
+// -- 1. Drop existing projection (if exists)
+CALL gds.graph.exists('customerArticulationGraph') YIELD exists
+WHERE exists
+CALL gds.graph.drop('customerArticulationGraph') YIELD graphName
+RETURN graphName + ' dropped' AS status;
+
+// -- 2. Create fresh graph projection with current data
+CALL gds.graph.project(
+    'customerArticulationGraph',
+    ['Customer', 'Email', 'Phone', 'SSN'],
+    {
+        HAS_EMAIL: {orientation: 'UNDIRECTED'},
+        HAS_PHONE: {orientation: 'UNDIRECTED'}, 
+        HAS_SSN: {orientation: 'UNDIRECTED'}
+    }
+)
+YIELD nodeCount, relationshipCount
+RETURN nodeCount, relationshipCount;
+
+// -- 3. Clear ALL previous articulation point flags
+MATCH (n)
+WHERE n.articulationPoint IS NOT NULL
+SET n.articulationPoint = NULL
+RETURN COUNT(n) AS "Articulation flags cleared";
+
+// -- 4. Run fresh articulation point detection
 CALL gds.articulationPoints.write('customerArticulationGraph', {
     writeProperty: 'articulationPoint'
-});
+})
+YIELD articulationPointCount
+RETURN articulationPointCount;
 
--- 2. Update labels
+// -- 5. Remove SuperConnector label from non-articulation points
 MATCH (n:SuperConnector)
 WHERE n.articulationPoint IS NULL OR n.articulationPoint = 0
-REMOVE n:SuperConnector;
+REMOVE n:SuperConnector
+RETURN COUNT(n) AS "Labels removed from non-articulation points";
 
+// -- 6. Add SuperConnector label to new articulation points
 MATCH (n)
 WHERE n.articulationPoint = 1 AND NOT n:SuperConnector
-SET n:SuperConnector;
+SET n:SuperConnector
+RETURN COUNT(n) AS "New articulation points labeled";
 
--- 3. Generate report
-MATCH (n:SuperConnector)
-RETURN
-  labels(n)[0] AS nodeType,
-  COUNT(n) AS count,
-  AVG(SIZE([(n)-[]-() | 1])) AS avgConnections
-ORDER BY count DESC;
+// -- 7. Generate comprehensive status report
+MATCH (n)
+WHERE n.articulationPoint = 1
+WITH labels(n)[0] AS nodeType,
+     n,
+     SIZE([(n)-[]-() | 1]) AS connections
+WITH nodeType,
+     COUNT(n) AS articulationPointCount,
+     AVG(connections) AS avgConnections,
+     MAX(connections) AS maxConnections,
+     COLLECT(n)[0..3] AS examples
+RETURN nodeType, 
+       articulationPointCount,
+       round(avgConnections, 1) AS avgConnections,
+       maxConnections,
+       [ex IN examples | 
+           CASE labels(ex)[0]
+               WHEN 'Email' THEN ex.address
+               WHEN 'Phone' THEN ex.number
+               WHEN 'SSN' THEN substring(ex.value, 0, 3) + '-XX-XXXX'
+               ELSE ex.id
+           END + ' (' + SIZE([(ex)-[]-() | 1]) + ' connections)'
+       ] AS topExamples
+ORDER BY articulationPointCount DESC;
+
+// -- 8. Compare with previous week
+MATCH (n)
+WHERE n.articulationPoint = 1
+WITH n, COALESCE(n.previousArticulation, 0) AS wasArticulation
+SET n.previousArticulation = 1
+WITH labels(n)[0] AS nodeType,
+     SUM(CASE WHEN wasArticulation = 0 THEN 1 ELSE 0 END) AS newArticulationPoints,
+     COUNT(n) AS totalArticulationPoints
+RETURN nodeType, newArticulationPoints, totalArticulationPoints,
+       round(100.0 * newArticulationPoints / totalArticulationPoints, 1) AS percentNew
+ORDER BY newArticulationPoints DESC;
+
+// -- 9. Clean up previous articulation markers for nodes no longer articulation points
+MATCH (n)
+WHERE n.previousArticulation = 1 AND (n.articulationPoint IS NULL OR n.articulationPoint = 0)
+SET n.previousArticulation = 0
+RETURN COUNT(n) AS "No longer articulation points";
 ```
 
 ### Data Quality Pipeline

@@ -67,11 +67,15 @@ We focus on three critical super node types for synthetic identity fraud:
 > Identifies nodes with abnormally high connections
 
 ```cypher
-TBC
+CALL gds.degree.write('customerDegreeGraph', {
+    orientation: 'UNDIRECTED',
+    writeProperty: 'degreeScore'
+})
+YIELD centralityDistribution;
 ```
 
-- **Output**: Nodes exceeding normal connection patterns
-- [📖 Neo4j Documentation](https://neo4j.com/docs/graph-data-science/current/algorithms/degree-centrality/)
+- **Output**: Nodes exceeding normal connection patterns (typically >50 connections indicates super node)
+- [📖 Full Implementation Guide](DEGREE_CENTRALITY.md) | [Neo4j Documentation](https://neo4j.com/docs/graph-data-science/current/algorithms/degree-centrality/)
 
 #### 2. **Articulation Points**
 > Finds critical bridge nodes in the network
