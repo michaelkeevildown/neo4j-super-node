@@ -1,4 +1,4 @@
-# Articulation Points for Super-Connector Detection
+# Articulation Points for Super Nodes Detection
 
 ## Background
 
@@ -53,7 +53,7 @@ CALL gds.articulationPoints.write('customerArticulationGraph', {
 YIELD articulationPointCount;
 ```
 
-### 3. Analyze Detected Super-Connectors
+### 3. Analyse Detected Super Nodes
 
 Review the articulation points to understand their impact:
 
@@ -88,7 +88,7 @@ RETURN path
 
 #### Option 2: Label-Based Exclusion (Recommended)
 
-A cleaner approach is to mark super-connectors with an exclusion label:
+A cleaner approach is to mark super nodes with an exclusion label:
 
 ```cypher
 // Add exclusion label to articulation points
@@ -108,9 +108,9 @@ RETURN path
 This label-based approach offers several advantages:
 
 1. **Cleaner Queries**: No WHERE clauses cluttering your fraud detection logic
-2. **Better Performance**: Label filtering is optimized in Neo4j
+2. **Better Performance**: Label filtering is optimised in Neo4j
 3. **Easy Management**: Simply add/remove the SuperConnector label as needed
-4. **Visual Clarity**: Super-connectors are clearly marked in graph visualizations
+4. **Visual Clarity**: Super nodes are clearly marked in graph visualizations
 
 ### Ongoing Management
 
