@@ -1,16 +1,16 @@
-# 🔍 Super Node Detection
+# 🔍 Super Node Detection for Data Quality
 
 > **Enhance data accuracy by identifying and filtering super nodes in Neo4j graphs**
 
 ## 🎯 Quick Start
 
-Super nodes are highly connected nodes that often represent dirty data. This project helps you identify and manage these nodes to improve financial networks.
+Super nodes are highly connected nodes that often represent dirty data rather than actual patterns. This project helps you identify and manage these nodes to improve data quality in your networks.
 
 ## 📊 The Problem
 
 ### Why Super Nodes Matter
 
-In production databases, data quality issues create artificial connections that obscure real patterns:
+In production databases, data quality issues create artificial connections that obscure real data patterns:
 
 | Data Type | Common Default Values | Impact |
 |-----------|----------------------|--------|
@@ -53,12 +53,12 @@ These placeholder values become **super nodes** - creating thousands of false co
 
 ### 🎯 Primary Targets
 
-We focus on three critical super node types in this demo:
+We focus on three critical super node types for data quality:
 
 | Priority | Node Type | Why It Matters |
 |----------|-----------|----------------|
 | **1** | 📱 Phone Numbers | Most commonly reused/defaulted |
-| **2** | 🆔 SSNs | Shared across synthetic identities |
+| **2** | 🆔 SSNs | Shared across duplicate identities |
 | **3** | 📧 Email Addresses | Frequent placeholder values |
 
 ### 📈 Algorithm Suite
@@ -119,7 +119,7 @@ YIELD centralityDistribution;
 ### The Power Trinity: Closeness + Degree + Articulation
 
 ```cypher
-// Create comprehensive super node detection
+// Create comprehensive super node detection for data quality
 MATCH (n)
 WHERE n.closenessScore IS NOT NULL 
    OR n.degreeScore IS NOT NULL 
@@ -140,7 +140,7 @@ RETURN COUNT(n) AS HighRiskNodesIdentified;
 
 ## 📚 Resources
 
-- [Financial Services Use Cases](https://neo4j.com/developer/industry-use-cases/)
+- [Data Quality Best Practices](https://neo4j.com/developer/data-modeling/)
 - [Neo4j Graph Data Science Documentation](https://neo4j.com/docs/graph-data-science/)
-- [Fraud Detection Best Practices](https://neo4j.com/use-cases/fraud-detection/)
+- [Network Analysis Use Cases](https://neo4j.com/use-cases/)
 - [Community Forum](https://community.neo4j.com/)
