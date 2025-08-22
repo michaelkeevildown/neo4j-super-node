@@ -87,49 +87,60 @@ CALL gds.articulationPoints.write('customerArticulationGraph', {
 YIELD articulationPointCount;
 ```
 
-- **Key Insight**: Real fraud networks have redundant connections; dirty data creates single failure points
+- **Output**: Boolean property marking nodes whose removal would disconnect the graph (super nodes often act as bridges between unrelated customer clusters)
 - [📖 Neo4j Documentation](https://neo4j.com/docs/graph-data-science/current/algorithms/articulation-points/)
 
-#### 3. **Community Detection + Bridge Analysis**
-> Identifies nodes unnaturally connecting separate communities
+#### 3. **Closeness Centrality**
+> Finds how quickly a node can reach all other nodes in your graph.
 
 ```cypher
-TBC
+CALL gds.closeness.write('customerClosenessGraph', {
+    writeProperty: 'closenessScore'
+})
+YIELD centralityDistribution;
 ```
 
-- **Method**: Detect communities → Find multi-community nodes
-- **Result**: Nodes artificially linking unrelated groups
+- **Output**: Closeness score (0-1) measuring how central a node is to the entire network - super nodes score higher due to their extensive connections
+- [📖 Full Implementation Guide](CLOSENESS_CENTRALITY.md) | [Neo4j Documentation](https://neo4j.com/docs/graph-data-science/current/algorithms/closeness-centrality/)
 
-## 💡 Real-World Use Cases
+### Information Flow Risk Matrix
 
-### 🎭 Synthetic Identity Fraud
+| Closeness | Degree | Articulation | Risk Level | Action |
+|-----------|--------|--------------|------------|--------|
+| **High** | High | Yes | 🔴 Critical | Auto-exclude |
+| **High** | High | No | 🟠 Very High | Manual review |
+| **High** | Low | Yes | 🟠 High | Investigate |
+| **High** | Low | No | 🟡 Medium | Monitor |
+| **Low** | High | Yes | 🟡 Medium | Monitor |
+| **Low** | Low | No | 🟢 Low | Include |
 
-**The Pattern:**
+## 🔄 Combining with Other Centrality Measures
+
+### The Power Trinity: Closeness + Degree + Articulation
+
+```cypher
+// Create comprehensive super node detection
+MATCH (n)
+WHERE n.closenessScore IS NOT NULL 
+   OR n.degreeScore IS NOT NULL 
+   OR n.articulationPoint IS NOT NULL
+WITH n,
+     COALESCE(n.closenessScore, 0) AS closeness,
+     COALESCE(n.degreeScore, 0) AS degree,
+     COALESCE(n.articulationPoint, 0) AS articulation
+SET n.superNodeRisk = 
+    (CASE WHEN closeness > 0.6 THEN 3 ELSE 0 END) +
+    (CASE WHEN degree > 50 THEN 3 ELSE 0 END) +
+    (CASE WHEN articulation = 1 THEN 2 ELSE 0 END)
+WITH n
+WHERE n.superNodeRisk >= 4
+SET n:HighRiskSuperNode
+RETURN COUNT(n) AS HighRiskNodesIdentified;
 ```
-Fake Identity = Real SSN + Fake Phone + Fake Email + Fake Address
-```
-
-**Detection Strategy:**
-1. Filter out super nodes (dirty data)
-2. Find SSNs with suspicious connection patterns
-3. Identify velocity changes in identity creation
-
-### 🏦 First-Party Fraud
-
-**The Pattern:**
-```
-Legitimate Customer → Commits Fraud → Networks with Accomplices
-```
-
-**Detection Strategy:**
-1. Exclude coincidental connections (super nodes)
-2. Focus on deliberate network formation
-3. Monitor behavioral changes over time
-
----
 
 ## 📚 Resources
 
+- [Financial Services Use Cases](https://neo4j.com/developer/industry-use-cases/)
 - [Neo4j Graph Data Science Documentation](https://neo4j.com/docs/graph-data-science/)
 - [Fraud Detection Best Practices](https://neo4j.com/use-cases/fraud-detection/)
 - [Community Forum](https://community.neo4j.com/)

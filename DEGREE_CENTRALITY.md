@@ -166,7 +166,7 @@ ORDER BY s.degreeScore DESC
 LIMIT 25;
 ```
 
-## 🛡️ Applying Results to Fraud Detection
+## 🛡️ Applying Results
 
 ### Option 1: WHERE Clause Filtering
 
@@ -203,114 +203,7 @@ RETURN COUNT(n) AS MediumDegreeNodesLabeled;
 MATCH p=(c1:Customer)-[:HAS_PHONE]->(phone:!SuperConnector)<-[:HAS_PHONE]-(c2:Customer)
 WHERE c1 <> c2
 RETURN p;
-
-// Include monitored nodes but flag them
-MATCH p=(c1:Customer)-[:HAS_EMAIL]->(email)<-[:HAS_EMAIL]-(c2:Customer)
-WHERE c1 <> c2
-RETURN p,
-    CASE WHEN email:MonitorNode THEN 'Warning: Shared Email' ELSE 'Normal' END AS Flag;
 ```
-
-## 📊 Ongoing Management Strategy
-
-### Weekly Maintenance Tasks
-
-```cypher
-// -- 1. Drop existing projection (if exists)
-CALL gds.graph.exists('customerDegreeGraph') YIELD exists
-WHERE exists
-CALL gds.graph.drop('customerDegreeGraph') YIELD graphName
-RETURN graphName + ' dropped' AS status;
-
-// -- 2. Create fresh graph projection with current data
-CALL gds.graph.project(
-    'customerDegreeGraph',
-    ['Customer', 'Email', 'Phone', 'SSN'],
-    {
-        HAS_EMAIL: {orientation: 'UNDIRECTED'},
-        HAS_PHONE: {orientation: 'UNDIRECTED'}, 
-        HAS_SSN: {orientation: 'UNDIRECTED'}
-    }
-)
-YIELD nodeCount, relationshipCount
-RETURN nodeCount, relationshipCount;
-
-// -- 3. Clear ALL previous degree scores (handles nodes that went to 0 connections)
-MATCH (n)
-WHERE n.degreeScore IS NOT NULL
-SET n.degreeScore = NULL
-RETURN COUNT(n) AS ScoresCleared;
-
-// -- 4. Calculate fresh degree centrality scores
-CALL gds.degree.write('customerDegreeGraph', {
-    orientation: 'UNDIRECTED',
-    writeProperty: 'degreeScore'
-})
-YIELD centralityDistribution
-RETURN 
-    centralityDistribution.min AS minDegree,
-    centralityDistribution.mean AS avgDegree,
-    centralityDistribution.max AS maxDegree,
-    centralityDistribution.p99 AS p99Degree;
-
-// -- 5. Remove SuperConnector label from nodes below threshold or with no score
-MATCH (n:SuperConnector)
-WHERE n.degreeScore IS NULL OR n.degreeScore < 50
-REMOVE n:SuperConnector
-RETURN COUNT(n) AS LabelsRemoved;
-
-// -- 6. Remove MonitorNode label from nodes outside range
-MATCH (n:MonitorNode)
-WHERE n.degreeScore IS NULL OR n.degreeScore < 20 OR n.degreeScore >= 50
-REMOVE n:MonitorNode
-RETURN COUNT(n) AS MonitorLabelsRemoved;
-
-// -- 7. Add SuperConnector label to high-degree nodes
-MATCH (n)
-WHERE n.degreeScore >= 10 AND NOT n:SuperConnector
-SET n:SuperConnector
-RETURN COUNT(n) AS SuperConnectorLabelsAdded;
-
-// -- 8. Add MonitorNode label to medium-degree nodes
-MATCH (n)
-WHERE n.degreeScore >= 5 AND n.degreeScore < 10 AND NOT n:MonitorNode
-SET n:MonitorNode
-RETURN COUNT(n) AS MonitorNodeLabelsAdded;
-
-// -- 9. Generate status report
-MATCH (n)
-WHERE n.degreeScore IS NOT NULL
-WITH labels(n)[0] AS nodeType,
-    CASE
-        WHEN n.degreeScore >= 100 THEN 'Ultra High (100+)'
-        WHEN n.degreeScore >= 50 THEN 'Very High (50-100)'
-        WHEN n.degreeScore >= 20 THEN 'High (20-50)'
-        WHEN n.degreeScore >= 2 THEN 'Investigate (2-19)'
-        WHEN n.degreeScore = 1 THEN 'Unique (1)'
-        ELSE 'Isolated (0)'
-    END AS degreeCategory,
-    COUNT(n) AS nodeCount,
-    COLLECT(n)[0..3] AS examples
-RETURN nodeType, degreeCategory, nodeCount, 
-       [ex IN examples | 
-           CASE labels(ex)[0]
-               WHEN 'Email' THEN ex.address
-               WHEN 'Phone' THEN ex.phoneNumber
-               WHEN 'SSN' THEN substring(ex.ssnNumber, 0, 3) + '-XX-XXXX'
-               ELSE ex.id
-           END
-       ] AS exampleIdentifiers
-ORDER BY nodeType, degreeCategory DESC;
-```
-
-### Threshold Tuning Strategy
-
-| Node Type | Initial Threshold | Review After | Adjust Based On |
-|-----------|------------------|--------------|-----------------|
-| **Email** | 50 connections | 1 week | False positive rate |
-| **Phone** | 50 connections | 1 week | Business phone patterns |
-| **SSN** | 10 connections | Daily | Fraud risk tolerance |
-| **Address** | 100 connections | 2 weeks | Apartment buildings |
 
 ---
 
