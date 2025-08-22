@@ -1,10 +1,10 @@
 # 🔗 Articulation Points for Super Node Detection
 
-> **Identify critical bridge nodes that artificially connect unrelated customer clusters**
+> **Identify critical bridge nodes that artificially connect unrelated data clusters**
 
 ## 📖 What Are Articulation Points?
 
-Articulation points are nodes whose removal would **disconnect parts of your graph**. In fraud detection, these critical nodes often reveal data quality issues rather than genuine fraud patterns.
+Articulation points are nodes whose removal would **disconnect parts of your graph**. In data networks, these critical nodes often reveal data quality issues rather than genuine relationships.
 
 ### Real Example
 ```
@@ -14,9 +14,9 @@ Cluster A (100 customers) ←→ [test@test.com] ←→ Cluster B (200 customers
                           (removal splits graph)
 ```
 
-When a single email, phone, or SSN connects unrelated customer groups, it's typically **dirty data** - not fraud.
+When a single email, phone, or SSN connects unrelated customer groups, it's typically **dirty data** - not a real connection.
 
-## 🎯 Why This Matters for Fraud Detection
+## 🎯 Why This Matters for Data Quality
 
 ### The Problem with Traditional Approaches
 
@@ -24,7 +24,7 @@ When a single email, phone, or SSN connects unrelated customer groups, it's typi
 |----------|--------------|----------|
 | **High Degree Nodes** | Most connected nodes | Often just dirty data |
 | **Community Detection** | Customer clusters | Misses bridge nodes |
-| **Pattern Matching** | Known fraud patterns | Can't adapt to new schemes |
+| **Pattern Matching** | Known data patterns | Can't adapt to new issues |
 
 ### What Articulation Points Reveal
 
@@ -32,7 +32,7 @@ When a single email, phone, or SSN connects unrelated customer groups, it's typi
 |------|-------------|---------|--------|
 | 🗑️ **Dirty Data** | Placeholder values bridging clusters | `test@test.com` | Exclude |
 | ✅ **Legitimate** | Real shared services | Corporate phone | Monitor |
-| 🚨 **Fraud** | Intentional identity reuse | Synthetic SSN | Investigate |
+| 🚨 **Anomaly** | Unusual identity patterns | Duplicate SSN | Investigate |
 
 ## 🚀 Implementation Guide
 

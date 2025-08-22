@@ -1,10 +1,10 @@
 # 📊 Degree Centrality for Super Node Detection
 
-> **Identify highly connected nodes that may represent data quality issues rather than genuine fraud patterns**
+> **Identify highly connected nodes that may represent data quality issues rather than genuine patterns**
 
 ## 📖 What Is Degree Centrality?
 
-Degree centrality measures the **number of direct connections** a node has in your graph. In fraud detection, nodes with abnormally high degree centrality often indicate placeholder values or test data rather than actual fraudulent activity.
+Degree centrality measures the **number of direct connections** a node has in your graph. In network analysis, nodes with abnormally high degree centrality often indicate placeholder values or test data rather than actual meaningful relationships.
 
 ### Real Example
 ```
@@ -17,18 +17,18 @@ Customer1  Customer2  Customer3 ... Customer500
                             (500+ connections = red flag)
 ```
 
-When a single phone number, email, or SSN has hundreds of connections, it's typically **test data or defaults** - not a fraud ring.
+When a single phone number, email, or SSN has hundreds of connections, it's typically **test data or defaults** - not a real pattern.
 
-## 🎯 Why This Matters for Fraud Detection
+## 🎯 Why This Matters for Data Quality
 
 ### The Problem with Raw Connection Counts
 
 | Scenario | What You See | What It Actually Is | Impact |
 |----------|--------------|---------------------|--------|
-| **Default Phone** | 500+ connections | `000-000-0000` placeholder | False fraud alerts |
+| **Default Phone** | 500+ connections | `000-000-0000` placeholder | False pattern alerts |
 | **Test Email** | 200+ connections | `test@test.com` | Noise in analysis |
 | **Corporate Phone** | 50+ connections | Legitimate shared line | Mixed signals |
-| **Fraud Ring** | 5-10 connections | Actual criminal network | Lost in the noise |
+| **Data Cluster** | 5-10 connections | Actual related entities | Lost in the noise |
 
 ### What Degree Centrality Reveals
 
@@ -121,7 +121,7 @@ RETURN
         ELSE '✅ Review'
     END AS Classification,
     CASE
-        WHEN e.degreeScore > 100 THEN 'Auto-exclude from all fraud queries'
+        WHEN e.degreeScore > 100 THEN 'Auto-exclude from all data queries'
         WHEN e.address CONTAINS 'test' THEN 'Known test pattern'
         ELSE 'Manual review required'
     END AS Action
@@ -157,7 +157,7 @@ RETURN
     substring(s.ssnNumber, 0, 3) + '-XX-XXXX' AS MaskedSSN,
     s.degreeScore AS Connections,
     CASE
-        WHEN s.degreeScore > 50 THEN '🔴 Critical - Synthetic Identity'
+        WHEN s.degreeScore > 50 THEN '🔴 Critical - Duplicate Identity'
         WHEN s.ssnNumber STARTS WITH '000' THEN '🟠 Invalid SSN'
         WHEN s.degreeScore >= 10 THEN '⚠️ High Risk - Investigate'
         ELSE '✅ Normal'
@@ -199,7 +199,7 @@ RETURN COUNT(n) AS MediumDegreeNodesLabeled;
 
 #### Use in Queries: Efficient Filtering
 ```cypher
-// Find fraud patterns excluding super nodes
+// Find data patterns excluding super nodes
 MATCH p=(c1:Customer)-[:HAS_PHONE]->(phone:!SuperConnector)<-[:HAS_PHONE]-(c2:Customer)
 WHERE c1 <> c2
 RETURN p;

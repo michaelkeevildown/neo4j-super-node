@@ -1,10 +1,10 @@
 # 🎯 Closeness Centrality for Information Flow Analysis
 
-> **Identify nodes positioned to rapidly spread information through your fraud network**
+> **Identify nodes positioned to rapidly spread information through your data network**
 
 ## 📖 What Is Closeness Centrality?
 
-Closeness centrality measures how **quickly a node can reach all other nodes** in your graph. In fraud detection, nodes with high closeness centrality are positioned at the "center" of information flow - they're the shortest average distance from everyone else.
+Closeness centrality measures how **quickly a node can reach all other nodes** in your graph. In network analysis, nodes with high closeness centrality are positioned at the "center" of information flow - they're the shortest average distance from everyone else.
 
 ### Real Example
 ```
@@ -19,9 +19,9 @@ Closeness centrality measures how **quickly a node can reach all other nodes** i
     (shortest average path to all nodes)
 ```
 
-When an identifier has high closeness centrality, it can **rapidly propagate fraud patterns** or data quality issues throughout your network.
+When an identifier has high closeness centrality, it can **rapidly propagate data patterns** or quality issues throughout your network.
 
-## 🎯 Why This Matters for Fraud Detection
+## 🎯 Why This Matters for Data Quality
 
 ### The Information Spread Problem
 
@@ -36,7 +36,7 @@ When an identifier has high closeness centrality, it can **rapidly propagate fra
 | Score Range | Position | Typical Pattern | Action |
 |-------------|----------|-----------------|--------|
 | 🔴 **0.8-1.0** | Network center | System defaults/test data | Auto-exclude |
-| 🟠 **0.6-0.8** | Well-connected | Possible synthetic identity | Deep investigation |
+| 🟠 **0.6-0.8** | Well-connected | Possible duplicate identity | Deep investigation |
 | 🟡 **0.4-0.6** | Moderate reach | Normal business patterns | Monitor |
 | 🟢 **< 0.4** | Peripheral | Genuine isolated cases | Include in analysis |
 
@@ -127,12 +127,12 @@ RETURN
         WHEN score > 0.8 THEN '🔴 Central Hub - Exclude'
         WHEN e.address CONTAINS 'test' THEN '🟠 Test Data - Exclude'
         WHEN e.address CONTAINS 'noreply' THEN '🟠 System Email - Exclude'
-        WHEN score > 0.6 AND directConnections > 10 THEN '⚠️ Synthetic Identity Risk'
+        WHEN score > 0.6 AND directConnections > 10 THEN '⚠️ Data Quality Risk'
         WHEN score > 0.5 THEN '🟡 Monitor Closely'
         ELSE '✅ Normal'
     END AS Classification,
     CASE
-        WHEN score > 0.8 THEN 'Auto-exclude from fraud detection'
+        WHEN score > 0.8 THEN 'Auto-exclude from data analysis'
         WHEN score > 0.6 THEN 'Flag for manual review'
         ELSE 'Include with monitoring'
     END AS Action
@@ -155,7 +155,7 @@ RETURN
         WHEN score > 0.8 THEN '🔴 Central Hub - Exclude'
         WHEN p.phoneNumber CONTAINS '000000' THEN '🟠 Default - Exclude'
         WHEN p.phoneNumber CONTAINS '555' THEN '🟠 Fictional - Exclude'
-        WHEN score > 0.6 AND directConnections > 10 THEN '⚠️ Fraud Ring Center'
+        WHEN score > 0.6 AND directConnections > 10 THEN '⚠️ Data Hub Center'
         WHEN score > 0.5 THEN '🟡 Information Broker'
         ELSE '✅ Normal'
     END AS Classification
@@ -176,10 +176,10 @@ RETURN
     round(score, 3) AS ClosenessScore,
     directConnections AS DirectLinks,
     CASE
-        WHEN score > 0.6 THEN '🔴 Critical - Identity Theft Hub'
+        WHEN score > 0.6 THEN '🔴 Critical - Data Quality Hub'
         WHEN s.ssnNumber STARTS WITH '000' THEN '🟠 Invalid SSN'
-        WHEN score > 0.4 AND directConnections > 5 THEN '⚠️ Synthetic Identity'
-        WHEN score > 0.3 THEN '🟡 Suspicious Activity'
+        WHEN score > 0.4 AND directConnections > 5 THEN '⚠️ Duplicate Identity'
+        WHEN score > 0.3 THEN '🟡 Data Anomaly'
         ELSE '✅ Normal'
     END AS Classification,
     'Immediate investigation required' AS Priority

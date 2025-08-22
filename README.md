@@ -1,16 +1,16 @@
-# 🔍 Super Node Detection for Fraud Prevention
+# 🔍 Super Node Detection
 
-> **Enhance fraud detection accuracy by identifying and filtering super nodes in Neo4j graphs**
+> **Enhance data accuracy by identifying and filtering super nodes in Neo4j graphs**
 
 ## 🎯 Quick Start
 
-Super nodes are highly connected nodes that often represent dirty data rather than actual fraudulent patterns. This project helps you identify and manage these nodes to improve fraud detection in financial networks.
+Super nodes are highly connected nodes that often represent dirty data. This project helps you identify and manage these nodes to improve financial networks.
 
 ## 📊 The Problem
 
 ### Why Super Nodes Matter
 
-In production databases, data quality issues create artificial connections that obscure real fraud patterns:
+In production databases, data quality issues create artificial connections that obscure real patterns:
 
 | Data Type | Common Default Values | Impact |
 |-----------|----------------------|--------|
@@ -53,7 +53,7 @@ These placeholder values become **super nodes** - creating thousands of false co
 
 ### 🎯 Primary Targets
 
-We focus on three critical super node types for synthetic identity fraud:
+We focus on three critical super node types in this demo:
 
 | Priority | Node Type | Why It Matters |
 |----------|-----------|----------------|

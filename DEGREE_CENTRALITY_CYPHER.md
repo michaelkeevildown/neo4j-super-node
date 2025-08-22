@@ -34,12 +34,12 @@ This pure Cypher approach is provided for:
 
 ## 📖 Overview
 
-This guide provides pure Cypher alternatives to GDS degree centrality for detecting super nodes in your fraud detection graph. Perfect for environments where GDS is not available or when you need quick, lightweight analysis.
+This guide provides pure Cypher alternatives to GDS degree centrality for detecting super nodes in your data network graph. Perfect for environments where GDS is not available or when you need quick, lightweight analysis.
 
 ### What You'll Learn
 - Calculate degree centrality using COUNT aggregations
 - Detect and mark super nodes efficiently
-- Exclude placeholder/test data from fraud analysis
+- Exclude placeholder/test data from network analysis
 - Maintain degree scores without graph projections
 
 ## 🎯 Quick Start: Find Your Super Nodes
