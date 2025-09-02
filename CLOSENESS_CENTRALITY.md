@@ -140,6 +140,13 @@ ORDER BY score DESC
 LIMIT 25;
 ```
 
+Find top connected email address
+```
+WITH "EMAIL ADDRESS IN HERE" AS emailAddress
+MATCH path=(:Email {address: emailAddress})<-[:HAS_EMAIL]-(:Customer)
+RETURN path;
+```
+
 #### 📱 Phone Information Hubs
 ```cypher
 MATCH (p:Phone)
@@ -161,6 +168,13 @@ RETURN
     END AS Classification
 ORDER BY score DESC
 LIMIT 25;
+```
+
+Find top connected phone number
+```
+WITH "PHONE NUMBER IN HERE" AS phoneNumber
+MATCH path=(:Phone {phoneNumber: phoneNumber})<-[:HAS_PHONE]-(:Customer)
+RETURN path;
 ```
 
 #### 🆔 SSN Information Hubs

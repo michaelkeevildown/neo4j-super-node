@@ -129,6 +129,13 @@ ORDER BY e.degreeScore DESC
 LIMIT 25;
 ```
 
+Find top connected email address
+```
+WITH "EMAIL ADDRESS IN HERE" AS emailAddress
+MATCH path=(:Email {address: emailAddress})<-[:HAS_EMAIL]-(:Customer)
+RETURN path;
+```
+
 #### 📱 Phone Super Nodes
 ```cypher
 MATCH (p:Phone)
