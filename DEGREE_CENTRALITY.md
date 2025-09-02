@@ -155,6 +155,13 @@ ORDER BY p.degreeScore DESC
 LIMIT 25
 ```
 
+Find top connected phone number
+```
+WITH "PHONE NUMBER IN HERE" AS phoneNumber
+MATCH path=(:Phone {phoneNumber: phoneNumber})<-[:HAS_PHONE]-(:Customer)
+RETURN path;
+```
+
 #### 🆔 SSN Super Nodes
 ```cypher
 MATCH (s:SSN)
